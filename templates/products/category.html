@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Category Hero Section -->
+<section class="category-hero-section">
+    <div class="category-hero-overlay"></div>
+    <div class="container">
+        <div class="row align-items-center min-vh-40">
+            <div class="col-12 text-center">
+                <div class="category-badge">🏷️ Category</div>
+                <h1 class="category-title">
+                    <span class="category-main">{{ category.name }}</span>
+                    <span class="category-sub">Premium Collection</span>
+                </h1>
+                <p class="category-description">
+                    {% if category.description %}
+                        {{ category.description }}
+                    {% else %}
+                        Discover our premium {{ category.name }} collection. Quality products designed for comfort and style.
+                    {% endif %}
+                </p>
+                <div class="category-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ products.total }}</span>
+                        <span class="stat-label">Products</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">{{ category.gender.title() }}</span>
+                        <span class="stat-label">Collection</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4.8</span>
+                        <span class="stat-label">Rating</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Products Section -->
+<section class="category-products-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-header text-center mb-5">
+                    <h2 class="section-title">{{ category.name }} Collection</h2>
+                    <p class="section-subtitle">Browse our complete {{ category.name }} selection</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row">
+            {% for product in products.items %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="product-card">
+                    <div class="product-image-container">
+                        {% if product.image_file.startswith('http') %}
+                            <img src="{{ product.image_file }}"
+                                 alt="{{ product.name }}"
+                                 class="product-image"
+                                 onerror="handleImageError(this)">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/' + product.image_file) }}"
+                                 alt="{{ product.name }}"
+                                 class="product-image"
+                                 onerror="handleImageError(this)">
+                        {% endif %}
+                        <div class="product-overlay">
+                            <a href="{{ url_for('products.detail', product_id=product.id) }}"
+                               class="btn btn-view-product">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                        <div class="product-badge">
+                            {% if product.stock <= 0 %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% elif product.stock <= 5 %}
+                                <span class="badge bg-warning">Low Stock</span>
+                            {% else %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="product-info">
+                        <h5 class="product-title">
+                            <a href="{{ url_for('products.detail', product_id=product.id) }}">{{ product.name }}</a>
+                        </h5>
+                        <p class="product-description">{{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}</p>
+                        <div class="product-price">
+                            <span class="price">${{ "%.2f"|format(product.price) }}</span>
+                        </div>
+                        <div class="product-meta">
+                            <span class="stock-info">Stock: {{ product.stock }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        {% if products.items|length == 0 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3>No Products Found</h3>
+                    <p>We don't have any products in this category yet. Check back soon for new arrivals!</p>
+                    <a href="{{ url_for('products.index') }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Browse All Products
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if products.pages > 1 %}
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="Product pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('products.category', category_id=category.id, page=products.prev_num) }}">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                <i class="fas fa-chevron-left"></i> Previous
+                            </span>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in products.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                        {% if page_num %}
+                        {% if page_num == products.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('products.category', category_id=category.id, page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('products.category', category_id=category.id, page=products.next_num) }}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Category Hero Styles -->
+<style>
+.category-hero-section {
+    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+    color: white;
+    padding: 2.5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.min-vh-40 {
+    min-height: 40vh;
+}
+
+.category-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.category-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.category-main {
+    display: block;
+    font-size: 2.8rem;
+}
+
+.category-sub {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+.category-description {
+    font-size: 1.05rem;
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+    opacity: 0.9;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    color: #718096;
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #4a5568;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #718096;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .category-title {
+        font-size: 2rem;
+    }
+    
+    .category-main {
+        font-size: 2.5rem;
+    }
+    
+    .category-sub {
+        font-size: 1.2rem;
+    }
+    
+    .category-stats {
+        gap: 2rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Optional additional client-side logic for products can go here
+});
+</script>
+{% endblock %}

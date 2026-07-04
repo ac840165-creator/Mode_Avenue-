@@ -1,0 +1,770 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container-fluid">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">{{ current_user.username }}</h1>
+                        <p class="profile-email">{{ current_user.email }}</p>
+                        <div class="profile-status">
+                            <span class="status-badge">
+                                <i class="fas fa-map-marker-alt"></i> Addresses
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ addresses|length }}</div>
+                        <div class="stat-label">Saved Addresses</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row profile-content">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3">
+                <div class="profile-sidebar">
+                    <div class="sidebar-menu">
+                        <a href="{{ url_for('auth.profile') }}" class="sidebar-link">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Profile Settings</span>
+                        </a>
+                        <a href="{{ url_for('auth.wishlist') }}" class="sidebar-link">
+                            <i class="fas fa-heart"></i>
+                            <span>Wishlist</span>
+                        </a>
+                        <a href="{{ url_for('auth.order_history') }}" class="sidebar-link">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Order History</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="addresses-main">
+                    {% if addresses %}
+                        <!-- Addresses List -->
+                        <div class="addresses-section">
+                            <div class="section-header">
+                                <h3><i class="fas fa-map-marker-alt"></i> Your Addresses</h3>
+                                <button class="btn btn-primary" onclick="showAddAddressModal()">
+                                    <i class="fas fa-plus"></i> Add New Address
+                                </button>
+                            </div>
+
+                            <div class="addresses-grid">
+                                {% for address in addresses %}
+                                <div class="address-card">
+                                    <div class="address-header">
+                                        <div class="address-type">
+                                            {% if address.is_default %}
+                                                <span class="default-badge">
+                                                    <i class="fas fa-star"></i> Default
+                                                </span>
+                                            {% endif %}
+                                            <h4>{{ address.address_type.title() }} Address</h4>
+                                        </div>
+                                        <div class="address-actions">
+                                            <button class="btn btn-sm btn-outline-primary" onclick="editAddress({{ address.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteAddress({{ address.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="address-content">
+                                        <div class="address-info">
+                                            <p class="street">{{ address.street_address }}</p>
+                                            <p class="city-state">
+                                                {{ address.city }}, {{ address.state }} {{ address.zip_code }}
+                                            </p>
+                                            <p class="country">{{ address.country }}</p>
+                                        </div>
+                                        <div class="address-footer">
+                                            {% if not address.is_default %}
+                                                <button class="btn btn-outline-success btn-sm" onclick="setDefaultAddress({{ address.id }})">
+                                                    <i class="fas fa-star"></i> Set as Default
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Empty Addresses State -->
+                        <div class="empty-addresses">
+                            <div class="empty-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h2>No Addresses Saved</h2>
+                            <p>Add your shipping and billing addresses to make checkout faster and easier.</p>
+                            <button class="btn btn-primary" onclick="showAddAddressModal()">
+                                <i class="fas fa-plus"></i> Add Your First Address
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Address Modal -->
+<div class="modal fade" id="addAddressModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAddressForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="address_type">Address Type</label>
+                                <select class="form-control" id="address_type" name="address_type" required>
+                                    <option value="shipping">Shipping Address</option>
+                                    <option value="billing">Billing Address</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" class="form-control" id="country" name="country" value="USA" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="street_address">Street Address</label>
+                        <input type="text" class="form-control" id="street_address" name="street_address" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="state">State</label>
+                                <input type="text" class="form-control" id="state" name="state" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="zip_code">ZIP Code</label>
+                                <input type="text" class="form-control" id="zip_code" name="zip_code" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_default" name="is_default">
+                        <label class="form-check-label" for="is_default">
+                            Set as default address
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAddress()">Save Address</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showAddAddressModal() {
+    const modal = new bootstrap.Modal(document.getElementById('addAddressModal'));
+    modal.show();
+}
+
+function saveAddress() {
+    // This would typically submit the form via AJAX
+    // For now, we'll show a success message
+    alert('Address saved successfully!');
+    bootstrap.Modal.getInstance(document.getElementById('addAddressModal')).hide();
+}
+
+function editAddress(addressId) {
+    alert('Edit address functionality for address ID: ' + addressId);
+}
+
+function deleteAddress(addressId) {
+    if (confirm('Are you sure you want to delete this address?')) {
+        alert('Address deleted successfully!');
+    }
+}
+
+function setDefaultAddress(addressId) {
+    alert('Address set as default successfully!');
+}
+</script>
+
+<style>
+.profile-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+    padding-top: 80px;
+    padding-bottom: 50px;
+}
+
+.profile-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.profile-header-content {
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.profile-info h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.profile-email {
+    margin: 5px 0 10px 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.profile-content {
+    gap: 30px;
+}
+
+/* Sidebar */
+.profile-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 25px;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: #2a5298;
+    border-left-color: #2a5298;
+    transform: translateX(5px);
+}
+
+.sidebar-link i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Addresses Main */
+.addresses-main {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 25px 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Addresses Grid */
+.addresses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.address-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.address-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.address-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.address-type h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.default-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.address-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.address-content {
+    padding: 20px 25px;
+}
+
+.address-info p {
+    margin: 0 0 8px 0;
+    color: #1e293b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.street {
+    font-weight: 600;
+}
+
+.city-state {
+    color: #64748b;
+}
+
+.country {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.address-footer {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Empty Addresses */
+.empty-addresses {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 60px 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.empty-addresses:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.empty-addresses .empty-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    margin: 0 auto 30px;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    animation: location-pulse 2s infinite;
+}
+
+@keyframes location-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 32px rgba(245, 158, 11, 0.4);
+    }
+}
+
+.empty-addresses h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.empty-addresses p {
+    margin: 0 0 30px 0;
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.empty-addresses .btn {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    border: none;
+    cursor: pointer;
+}
+
+.empty-addresses .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Modal Styles */
+.modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    color: white;
+    border-radius: 16px 16px 0 0;
+    border: none;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #2a5298;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-check {
+    margin-top: 20px;
+}
+
+.form-check-input {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 2px solid #e5e7eb;
+}
+
+.form-check-input:checked {
+    background-color: #2a5298;
+    border-color: #2a5298;
+}
+
+.form-check-label {
+    margin-left: 8px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid #2a5298;
+    color: #2a5298;
+}
+
+.btn-outline-primary:hover {
+    background: #2a5298;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 2px solid #ef4444;
+    color: #ef4444;
+}
+
+.btn-outline-danger:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-outline-success {
+    background: transparent;
+    border: 2px solid #10b981;
+    color: #10b981;
+}
+
+.btn-outline-success:hover {
+    background: #10b981;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .profile-stats {
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .profile-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .sidebar-link {
+        flex: 1;
+        min-width: calc(50% - 5px);
+        padding: 12px 15px;
+        justify-content: center;
+        text-align: center;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .sidebar-link.active {
+        border-bottom-color: #2a5298;
+        border-left: none;
+    }
+
+    .section-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .addresses-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .address-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .address-actions {
+        justify-content: center;
+    }
+
+    .empty-addresses {
+        padding: 40px 20px;
+    }
+
+    .empty-addresses h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+{% endblock %}

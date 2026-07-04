@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if title %}{{ title }} - {% endif %}Mode Avenue</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+        <div class="container">
+            <!-- Brand Logo -->
+            <a class="navbar-brand" href="{{ url_for('main.home') }}">
+                <div class="brand-container">
+                    <div class="brand-icon">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-main">Mode</span>
+                        <span class="brand-sub">Avenue</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+                <span class="toggle-text">Menu</span>
+            </button>
+
+            <!-- Navigation Menu -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Main Navigation -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.home') }}">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="menDropdown" role="button" data-bs-toggle="dropdown">
+                            Men
+                        </a>
+                        <ul class="dropdown-menu custom-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('products.gender', gender='men') }}">
+                                All Men's Fashion
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=1) }}">
+                                Shirts
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=2) }}">
+                                Pants
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=3) }}">
+                                Jackets
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=4) }}">
+                                Shoes
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="womenDropdown" role="button" data-bs-toggle="dropdown">
+                            Women
+                        </a>
+                        <ul class="dropdown-menu custom-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('products.gender', gender='women') }}">
+                                All Women's Fashion
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=5) }}">
+                                Dresses
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=6) }}">
+                                Tops
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=7) }}">
+                                Skirts
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=8) }}">
+                                Shoes
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="kidsDropdown" role="button" data-bs-toggle="dropdown">
+                            Kids
+                        </a>
+                        <ul class="dropdown-menu custom-dropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('products.gender', gender='kids') }}">
+                                All Kids' Fashion
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=9) }}">
+                                T-Shirts
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=10) }}">
+                                Pants
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=11) }}">
+                                Dresses
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('products.category', category_id=12) }}">
+                                Shoes
+                            </a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.about') }}">
+                            About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.contact') }}">
+                            Contact
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Side Navigation -->
+                <ul class="navbar-nav ms-auto">
+                    <!-- Search Bar -->
+                    <li class="nav-item search-container">
+                        <form class="d-flex search-form" action="{{ url_for('products.index') }}" method="GET">
+                            <div class="input-group">
+                                <input class="form-control search-input" type="search" name="search" placeholder="Search products..." value="{{ request.args.get('search', '') }}">
+                                <button class="btn btn-search-modern" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+
+                    {% if session.user_id %}
+                        <!-- Cart -->
+                        <li class="nav-item cart-item">
+                            <a class="nav-link cart-link" href="{{ url_for('cart.view_cart') }}">
+                                <div class="cart-icon-container">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="cart-badge" id="cart-count">0</span>
+                                </div>
+                                <span class="cart-text">Cart</span>
+                            </a>
+                        </li>
+
+                        <!-- User Account -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle user-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="user-name">{{ session.username }}</span>
+                                <i class="fas fa-chevron-down user-arrow"></i>
+                            </a>
+                            <ul class="dropdown-menu custom-dropdown user-dropdown">
+                                <li class="dropdown-header">
+                                    <strong>{{ session.username }}</strong>
+                                    <br><small class="text-muted">{{ 'Admin' if session.is_admin else 'Customer' }}</small>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% if session.is_admin %}
+                                <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
+                                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                                    <i class="fas fa-user-edit"></i> Profile Settings
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.wishlist') }}">
+                                    <i class="fas fa-heart"></i> Wishlist
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.order_history') }}">
+                                    <i class="fas fa-history"></i> Order History
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Login/Register -->
+                        <li class="nav-item">
+                            <a class="nav-link auth-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-custom-primary register-btn" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main" class="container" style="margin-top: 100px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mb-3">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="custom-footer mt-5">
+        <div class="container footer-content">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0 footer-brand">
+                    <div class="brand-container mb-3" style="pointer-events: none; text-decoration: none;">
+                        <div class="brand-icon" style="width: 40px; height: 40px; font-size: 1.1rem; box-shadow: none;">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="brand-text">
+                            <span class="brand-main ms-2" style="color: white; font-size: 1.3rem;">Mode</span>
+                            <span class="brand-sub ms-2">Avenue</span>
+                        </div>
+                    </div>
+                    <p>Your one-stop shop for premium fashion for men, women, and kids. Discover the latest trends with uncompromised quality.</p>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0 footer-links">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.about') }}"><i class="fas fa-angle-right"></i> About Us</a></li>
+                        <li><a href="{{ url_for('main.contact') }}"><i class="fas fa-angle-right"></i> Contact Support</a></li>
+                        <li><a href="{{ url_for('products.index') }}"><i class="fas fa-angle-right"></i> Browse Shop</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12 footer-links">
+                    <h5>Connect With Us</h5>
+                    <p style="color: #9ca3af; font-size: 0.95rem;" class="mb-3">Join our community and stay updated with the latest releases.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-circle"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-circle"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-circle"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <small>&copy; 2024 Mode Avenue. Designed with <i class="fas fa-heart text-danger ms-1 me-1"></i> for Fashion.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+    <!-- Global JavaScript Helper for Image Errors -->
+    <script>
+        function handleImageError(img) {
+            img.onerror = null;
+            img.src = "{{ url_for('static', filename='images/luxury_mens_suit.jpg') }}";
+        }
+    </script>
+</body>
+</html>

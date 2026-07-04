@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <div class="logo-icon"><i class="fas fa-crown"></i></div>
+                <div class="logo-text"><span class="logo-main">Mode</span><span class="logo-sub">Admin</span></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-chart-pie"></i></div><span>Dashboard</span></a>
+            <a href="{{ url_for('admin.products') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-cube"></i></div><span>Products</span></a>
+            <a href="{{ url_for('admin.categories') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-layer-group"></i></div><span>Categories</span></a>
+            <a href="{{ url_for('admin.orders') }}" class="nav-item active"><div class="nav-icon"><i class="fas fa-shopping-cart"></i></div><span>Orders</span></a>
+            <a href="{{ url_for('admin.settings') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-cog"></i></div><span>Settings</span></a>
+            <a href="{{ url_for('admin.users') }}" class="nav-item {% if request.endpoint == 'admin.users' %}active{% endif %}"><div class="nav-icon"><i class="fas fa-users"></i></div><span>Users</span></a>
+            <div class="nav-divider"></div>
+            <a href="{{ url_for('main.home') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-external-link-alt"></i></div><span>View Website</span></a>
+            <a href="{{ url_for('admin.admin_logout') }}" class="nav-item logout"><div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div><span>Logout</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="admin-profile">
+                <div class="profile-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="profile-info"><span class="profile-name">{{ session.username }}</span><span class="profile-role">Administrator</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-main">
+        <div class="admin-header-section">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="welcome-badge"><i class="fas fa-eye"></i><span>View Order</span></div>
+                    <h1 class="main-title">Order Details</h1>
+                    <p class="subtitle">Order #ORD-{{ "{:04d}".format(order.id) }}</p>
+                </div>
+                <div class="header-right">
+                    <a href="{{ url_for('admin.orders') }}" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="order-details">
+                <div class="order-header">
+                    <div class="order-info">
+                        <h3>Order Information</h3>
+                        <p><strong>Order ID:</strong> #ORD-{{ "{:04d}".format(order.id) }}</p>
+                        <p><strong>Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <p><strong>Status:</strong> 
+                            <form action="{{ url_for('admin.update_order_status', order_id=order.id) }}" method="POST" class="d-inline-block ms-2">
+                                <select name="status" class="form-select form-select-sm status-select {{ 'status-pending' if order.status == 'pending' }} {{ 'status-confirmed' if order.status == 'confirmed' }} {{ 'status-shipped' if order.status == 'shipped' }} {{ 'status-delivered' if order.status == 'delivered' }} {{ 'status-cancelled' if order.status == 'cancelled' }}" onchange="this.form.submit()">
+                                    <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="confirmed" {% if order.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                    <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </form>
+                        </p>
+                    </div>
+                    <div class="customer-info">
+                        <h3>Customer Information</h3>
+                        <p><strong>Name:</strong> {{ order.user.username }}</p>
+                        <p><strong>Email:</strong> {{ order.user.email }}</p>
+                    </div>
+                </div>
+
+                <div class="order-items">
+                    <h3>Order Items</h3>
+                    <table class="table">
+                        <thead>
+                            <tr><th>Product</th><th>Quantity</th><th>Price</th><th>Total</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ "%.2f"|format(item.price) }}</td>
+                                <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="order-total">
+                    <h3>Order Total</h3>
+                    <p class="total-amount">${{ "%.2f"|format(order.total_amount) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-dashboard{display:flex;min-height:100vh;background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);}
+.admin-sidebar{width:280px;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,0.2);position:fixed;height:100vh;z-index:1000;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,0.1);}
+.sidebar-header{padding:1.5rem;border-bottom:1px solid rgba(102,126,234,0.1);margin-bottom:0.5rem;}
+.admin-logo{display:flex;align-items:center;gap:0.875rem;}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,#2a5298,#1e3c72);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.25rem;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.logo-text{display:flex;flex-direction:column;line-height:1.2;}
+.logo-main{font-size:1.375rem;font-weight:700;color:#1e293b;}
+.logo-sub{font-size:0.6875rem;color:#2a5298;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;}
+.sidebar-nav{padding:1rem;flex:1;}
+.nav-item{display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1rem;margin-bottom:0.5rem;color:#64748b;text-decoration:none;border-radius:12px;transition:all 0.3s ease;}
+.nav-item:hover,.nav-item.active{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));color:#2a5298;transform:translateX(4px);}
+.nav-icon{width:36px;height:36px;border-radius:10px;background:rgba(102,126,234,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.nav-item:hover .nav-icon,.nav-item.active .nav-icon{background:linear-gradient(135deg,#2a5298,#1e3c72);color:white;}
+.nav-item.logout{color:#ef4444;}
+.nav-item.logout:hover{background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(220,38,38,0.1));color:#dc2626;}
+.nav-item.logout:hover .nav-icon{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.nav-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(102,126,234,0.2),transparent);margin:1rem 0;}
+.sidebar-footer{padding:1rem;border-top:1px solid rgba(102,126,234,0.1);}
+.admin-profile{display:flex;align-items:center;gap:0.875rem;padding:0.75rem;background:linear-gradient(135deg,rgba(102,126,234,0.05),rgba(118,75,162,0.05));border-radius:12px;}
+.profile-avatar{width:40px;height:40px;background:linear-gradient(135deg,#2a5298,#1e3c72);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;}
+.profile-name{font-weight:600;color:#1e293b;}
+.profile-role{font-size:0.75rem;color:#2a5298;font-weight:500;}
+.admin-main{flex:1;margin-left:280px;padding:1rem 1.5rem 2rem 1.5rem;background:linear-gradient(180deg,#f1f5f9 0%,#f8fafc 100%);min-height:100vh;}
+.admin-header-section{background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);border-radius:20px;padding:1.5rem 2rem;margin-bottom:1.5rem;box-shadow:0 10px 40px rgba(102,126,234,0.3);position:relative;overflow:hidden;}
+.admin-header-section::before{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(255,255,255,0.1) 0%,transparent 70%);border-radius:50%;}
+.header-content{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+.header-left{flex:1;}
+.welcome-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.2);color:white;padding:0.5rem 1rem;border-radius:50px;font-size:0.875rem;font-weight:500;margin-bottom:1rem;}
+.main-title{font-size:1.75rem;font-weight:700;color:white;margin:0 0 0.5rem 0;}
+.subtitle{color:rgba(255,255,255,0.85);font-size:1rem;margin:0;}
+.btn-outline{background:transparent;color:white;border:2px solid rgba(255,255,255,0.5);padding:0.75rem 1.5rem;border-radius:12px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;transition:all 0.3s ease;}
+.btn-outline:hover{background:rgba(255,255,255,0.2);border-color:white;}
+.content-card{background:white;border-radius:16px;padding:2rem;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid #f1f5f9;}
+.order-details{display:flex;flex-direction:column;gap:2rem;}
+.order-header{display:grid;grid-template-columns:1fr 1fr;gap:2rem;padding-bottom:2rem;border-bottom:1px solid #e5e7eb;}
+.order-info h3,.customer-info h3{font-size:1.125rem;font-weight:600;color:#1e293b;margin-bottom:1rem;}
+.order-info p,.customer-info p{margin-bottom:0.5rem;color:#64748b;}
+.order-items h3{font-size:1.125rem;font-weight:600;color:#1e293b;margin-bottom:1rem;}
+.table{width:100%;border-collapse:separate;border-spacing:0;}
+.table th{background:#f8fafc;color:#64748b;font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;padding:0.75rem;text-align:left;}
+.table td{padding:1rem 0.75rem;border-bottom:1px solid #f1f5f9;}
+.order-total{text-align:right;padding-top:1rem;border-top:1px solid #e5e7eb;}
+.order-total h3{font-size:1rem;font-weight:600;color:#64748b;margin-bottom:0.5rem;}
+.total-amount{font-size:2rem;font-weight:700;color:#1e293b;}
+.badge{padding:0.5rem 1rem;border-radius:9999px;font-size:0.875rem;font-weight:600;}
+.status-select{border-radius:8px;font-weight:600;font-size:0.875rem;text-transform:uppercase;letter-spacing:0.02em;padding:0.4rem 2.5rem 0.4rem 1rem;cursor:pointer;transition:all 0.3s ease;border:none;box-shadow:0 2px 4px rgba(0,0,0,0.05);display:inline-block;vertical-align:middle;}
+.status-pending{background-color:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+.status-confirmed{background-color:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.status-shipped{background-color:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
+.status-delivered{background-color:#d1fae5;color:#065f46;border:1px solid #a7f3d0;}
+.status-cancelled{background-color:#f3f4f6;color:#374151;border:1px solid #e5e7eb;}
+.status-select:hover{transform:translateY(-1px);box-shadow:0 4px 6px rgba(0,0,0,0.1);}
+body{padding-top:0!important;}
+.navbar{display:none!important;}
+main.container{margin:0!important;padding:0!important;max-width:100%!important;}
+footer{display:none!important;}
+@media(max-width:768px){.admin-sidebar{transform:translateX(-100%);}.admin-main{margin-left:0;}.order-header{grid-template-columns:1fr;}}
+</style>
+{% endblock %}

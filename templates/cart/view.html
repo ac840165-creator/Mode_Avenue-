@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row pt-4">
+    <div class="col-12">
+        <h1 class="cart-title"><i class="fas fa-shopping-bag me-3 text-primary"></i>Shopping Cart</h1>
+    </div>
+</div>
+
+{% if cart_items %}
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="premium-card">
+            <div class="premium-card-header">
+                <h5 class="mb-0">Cart Items</h5>
+            </div>
+            <div class="card-body p-4">
+                {% for item in cart_items %}
+                <div class="row align-items-center cart-item-row {% if not loop.last %}border-bottom{% endif %}">
+                    <div class="col-md-2 text-center text-md-start">
+                        {% if item.product.image_file.startswith('http') %}
+                            <img src="{{ item.product.image_file }}" 
+                                 alt="{{ item.product.name }}" 
+                                 class="cart-item-image"
+                                 onerror="handleImageError(this)">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/' + item.product.image_file) }}" 
+                                 alt="{{ item.product.name }}" 
+                                 class="cart-item-image"
+                                 onerror="handleImageError(this)">
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 mt-3 mt-md-0">
+                        <h6 class="cart-item-title mb-1">{{ item.product.name }}</h6>
+                        <small class="text-muted d-block"><i class="fas fa-tag me-1 text-primary opacity-50"></i>{{ item.product.category.name }} | Size: <strong class="text-dark">{{ item.size }}</strong></small>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0 text-center text-md-start">
+                        <span class="price-tag">${{ "%.2f"|format(item.product.price) }}</span>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0 d-flex justify-content-center justify-content-md-start">
+                        <form method="POST" action="{{ url_for('cart.update_quantity', item_id=item.id) }}" class="m-0">
+                            <select name="quantity" class="form-select form-select-premium" onchange="this.form.submit()">
+                                {% for i in range(1, item.product.stock + 1) %}
+                                    <option value="{{ i }}"{% if i == item.quantity %} selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    <div class="col-md-2 mt-3 mt-md-0 d-flex justify-content-between justify-content-md-end align-items-center">
+                        <span class="fw-bold fs-5 text-dark">${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                        <a href="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" class="btn-remove ms-3" onclick="return confirm('Remove this item from cart?')" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="premium-card mb-4">
+            <div class="premium-card-header">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="summary-row">
+                    <span>Subtotal ({{ cart_items|length }} items)</span>
+                    <span class="fw-bold">${{ "%.2f"|format(total) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <span class="text-success fw-bold px-2 py-1 bg-success bg-opacity-10 rounded">Free</span>
+                </div>
+                <div class="summary-row border-bottom pb-3">
+                    <span>Tax (8%)</span>
+                    <span class="fw-bold">${{ "%.2f"|format(total * 0.08) }}</span>
+                </div>
+                
+                <div class="summary-row mt-3 align-items-center">
+                    <strong class="fs-5 text-dark">Total</strong>
+                    <strong class="summary-total">${{ "%.2f"|format(total * 1.08) }}</strong>
+                </div>
+                <div class="d-grid mt-4">
+                    <a href="{{ url_for('cart.checkout') }}" class="btn-premium-checkout">
+                        <i class="fas fa-credit-card me-2"></i>Proceed to Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="premium-card">
+            <div class="card-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="fas fa-headset fs-1 text-primary" style="opacity: 0.8;"></i>
+                </div>
+                <h6 class="fw-bold text-dark fs-5">Need Help?</h6>
+                <p class="small text-muted mb-4">
+                    Have questions about your order? Our customer service team is ready to help.
+                </p>
+                <a href="{{ url_for('main.contact') }}" class="btn-premium-outline w-100 d-inline-block">
+                    <i class="fas fa-envelope me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row mt-5">
+    <div class="col-12 text-center py-5 premium-card">
+        <i class="fas fa-shopping-cart empty-cart-icon"></i>
+        <h3 class="fw-bold text-dark mb-3">Your cart is empty</h3>
+        <p class="text-muted mb-4 fs-5">Looks like you haven't added any premium items to your cart yet.</p>
+        <a href="{{ url_for('products.index') }}" class="btn-premium-checkout d-inline-block" style="width: auto; padding: 0.8rem 2.5rem;">
+            <i class="fas fa-shopping-bag me-2"></i>Start Shopping
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<style>
+/* Cart Page Premium Styling */
+.cart-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 2rem;
+    letter-spacing: -0.02em;
+}
+
+.cart-title .text-primary {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.premium-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.98);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.premium-card:hover {
+    box-shadow: 0 15px 50px rgba(102, 126, 234, 0.12);
+}
+
+.premium-card-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+    border-bottom: 1px solid rgba(102, 126, 234, 0.08);
+    padding: 1.25rem 1.5rem;
+}
+
+.premium-card-header h5 {
+    font-weight: 700;
+    color: #2d3748;
+    margin: 0;
+}
+
+.cart-item-row {
+    transition: all 0.3s ease;
+    padding: 1.5rem 0;
+    margin: 0;
+}
+
+.cart-item-row:hover {
+    background: rgba(102, 126, 234, 0.02);
+    border-radius: 12px;
+}
+
+.cart-item-image {
+    max-height: 90px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.cart-item-title {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 1.1rem;
+}
+
+.price-tag {
+    color: #2a5298;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.form-select-premium {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 0.4rem 2rem 0.4rem 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    color: #2d3748;
+    background-color: #f8fafc;
+}
+
+.form-select-premium:focus {
+    border-color: #2a5298;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    background-color: white;
+}
+
+.btn-remove {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove:hover {
+    background: #ef4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.summary-total {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn-premium-checkout {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    border: none;
+    color: white !important;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    text-align: center;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+.btn-premium-checkout:hover {
+    background: linear-gradient(135deg, #5a67d8, #0f2027);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-premium-outline {
+    background: transparent;
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    color: #2a5298 !important;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-premium-outline:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: #2a5298;
+    transform: translateY(-1px);
+}
+
+.empty-cart-icon {
+    font-size: 5rem;
+    background: linear-gradient(135deg, #a0aec0, #cbd5e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1.5rem;
+}
+</style>
+{% endblock %}

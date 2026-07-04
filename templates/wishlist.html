@@ -1,0 +1,695 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container-fluid">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">{{ current_user.username }}</h1>
+                        <p class="profile-email">{{ current_user.email }}</p>
+                        <div class="profile-status">
+                            <span class="status-badge">
+                                <i class="fas fa-heart"></i> Wishlist
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ wishlist_items|length }}</div>
+                        <div class="stat-label">Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row profile-content">
+            <!-- Sidebar Navigation -->
+            <div class="col-lg-3">
+                <div class="profile-sidebar">
+                    <div class="sidebar-menu">
+                        <a href="{{ url_for('auth.profile') }}" class="sidebar-link">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Profile Settings</span>
+                        </a>
+                        <a href="{{ url_for('auth.wishlist') }}" class="sidebar-link active">
+                            <i class="fas fa-heart"></i>
+                            <span>Wishlist</span>
+                        </a>
+                        <a href="{{ url_for('auth.order_history') }}" class="sidebar-link">
+                            <i class="fas fa-shopping-bag"></i>
+                            <span>Order History</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="wishlist-main">
+                    {% if wishlist_items %}
+                        <!-- Wishlist Items -->
+                        <div class="wishlist-header">
+                            <h3><i class="fas fa-heart"></i> My Wishlist ({{ wishlist_items|length }} items)</h3>
+                            <div class="wishlist-actions">
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-share"></i> Share Wishlist
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="clearWishlist()">
+                                    <i class="fas fa-trash"></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="wishlist-grid">
+                            {% for product in wishlist_items %}
+                            <div class="wishlist-item">
+                                <div class="item-image">
+                                    <img src="{{ url_for('static', filename='images/' + product.image_file) }}" 
+                                         alt="{{ product.name }}"
+                                         onerror="this.src='{{ url_for('static', filename='images/default-product.jpg') }}'">
+                                    <button class="remove-btn" onclick="removeFromWishlist({{ product.id }})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="item-details">
+                                    <h4>{{ product.name }}</h4>
+                                    <div class="item-price">
+                                        <span class="current-price">${{ "%.2f"|format(product.price) }}</span>
+                                    </div>
+                                    <div class="item-stock">
+                                        <span class="{% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                                            <i class="fas {% if product.stock > 0 %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i> 
+                                            {% if product.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="item-actions">
+                                    <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="POST" style="flex: 1;">
+                                        <button type="submit" class="btn btn-primary add-to-cart" style="width: 100%;">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </form>
+                                    <a href="{{ url_for('products.detail', product_id=product.id) }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <!-- Empty Wishlist State -->
+                        <div class="empty-wishlist">
+                            <div class="empty-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <h2>Your Wishlist is Empty</h2>
+                            <p>Add items you love to your wishlist. Review them anytime and easily move them to your cart.</p>
+                            <a href="{{ url_for('main.home') }}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag"></i> Start Shopping
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function removeFromWishlist(productId) {
+    if (confirm('Remove this item from your wishlist?')) {
+        fetch(`/wishlist/remove/${productId}`, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                location.reload();
+            });
+    }
+}
+
+function clearWishlist() {
+    if (confirm('Are you sure you want to clear your entire wishlist?')) {
+        // Make AJAX call to clear wishlist
+        fetch('/wishlist/clear', {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Fallback: just reload the page
+                location.reload();
+            });
+    }
+}
+</script>
+
+<style>
+.profile-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+    padding-top: 80px;
+    padding-bottom: 50px;
+}
+
+.profile-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.profile-header-content {
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.profile-info h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.profile-email {
+    margin: 5px 0 10px 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.profile-content {
+    gap: 30px;
+}
+
+/* Sidebar */
+.profile-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 25px;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: #2a5298;
+    border-left-color: #2a5298;
+    transform: translateX(5px);
+}
+
+.sidebar-link i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Wishlist Main */
+.wishlist-main {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Empty Wishlist */
+.empty-wishlist {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 60px 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.empty-wishlist:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.empty-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    margin: 0 auto 30px;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    animation: heart-pulse 2s infinite;
+}
+
+@keyframes heart-pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4);
+    }
+}
+
+.empty-wishlist h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.empty-wishlist p {
+    margin: 0 0 30px 0;
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.empty-wishlist .btn {
+    background: linear-gradient(135deg, #2a5298, #1e3c72);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.empty-wishlist .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Wishlist Header */
+.wishlist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 25px 30px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.wishlist-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.wishlist-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* Wishlist Grid */
+.wishlist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.wishlist-item {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.wishlist-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+}
+
+.item-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    background: rgba(239, 68, 68, 0.9);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.remove-btn:hover {
+    background: #ef4444;
+    transform: scale(1.1);
+}
+
+.item-details {
+    padding: 20px;
+}
+
+.item-details h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.4;
+}
+
+.item-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.current-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.original-price {
+    font-size: 0.9rem;
+    color: #64748b;
+    text-decoration: line-through;
+}
+
+.discount {
+    font-size: 0.8rem;
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.item-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.stars {
+    color: #fbbf24;
+}
+
+.rating-text {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.item-stock {
+    margin-bottom: 15px;
+}
+
+.in-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #10b981;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.item-actions .btn {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-to-cart {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.add-to-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border: 2px solid #2a5298;
+    color: #2a5298;
+}
+
+.btn-outline-primary:hover {
+    background: #2a5298;
+    color: white;
+}
+
+.btn-outline-secondary,
+.btn-outline-danger {
+    background: transparent;
+    border: 2px solid #6b7280;
+    color: #6b7280;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #6b7280;
+    color: white;
+}
+
+.btn-outline-danger {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.btn-outline-danger:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .profile-stats {
+        justify-content: center;
+    }
+
+    .profile-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .sidebar-link {
+        flex: 1;
+        min-width: calc(50% - 5px);
+        padding: 12px 15px;
+        justify-content: center;
+        text-align: center;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .sidebar-link.active {
+        border-bottom-color: #2a5298;
+        border-left: none;
+    }
+
+    .wishlist-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .wishlist-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .wishlist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .item-actions {
+        flex-direction: column;
+    }
+
+    .empty-wishlist {
+        padding: 40px 20px;
+    }
+
+    .empty-wishlist h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="sidebar-header">
+            <div class="admin-logo">
+                <div class="logo-icon"><i class="fas fa-crown"></i></div>
+                <div class="logo-text"><span class="logo-main">Mode</span><span class="logo-sub">Admin</span></div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.dashboard') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-chart-pie"></i></div><span>Dashboard</span></a>
+            <a href="{{ url_for('admin.products') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-cube"></i></div><span>Products</span></a>
+            <a href="{{ url_for('admin.categories') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-layer-group"></i></div><span>Categories</span></a>
+            <a href="{{ url_for('admin.orders') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-shopping-cart"></i></div><span>Orders</span></a>
+            <a href="{{ url_for('admin.settings') }}" class="nav-item"><div class="nav-icon"><i class="fas fa-cog"></i></div><span>Settings</span></a>
+            <a href="{{ url_for('admin.users') }}" class="nav-item active"><div class="nav-icon"><i class="fas fa-users"></i></div><span>Users</span></a>
+            <div class="nav-divider"></div>
+            
+            <a href="{{ url_for('main.home') }}" class="nav-item">
+                <div class="nav-icon">
+                    <i class="fas fa-external-link-alt"></i>
+                </div>
+                <span>View Website</span>
+            </a>
+            
+            <a href="{{ url_for('admin.admin_logout') }}" class="nav-item logout">
+                <div class="nav-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <span>Logout</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="admin-profile">
+                <div class="profile-avatar"><i class="fas fa-user-shield"></i></div>
+                <div class="profile-info"><span class="profile-name">{{ session.username }}</span><span class="profile-role">Administrator</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-main">
+        <div class="admin-header-section">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="welcome-badge"><i class="fas fa-users"></i><span>Users</span></div>
+                    <h1 class="main-title">Manage Users</h1>
+                    <p class="subtitle">View and manage registered customers and administrators</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <div class="header-title">
+                    <div class="title-icon"><i class="fas fa-list"></i></div>
+                    <h3>All Users</h3>
+                </div>
+                <span class="badge bg-secondary">{{ users.total }} Users</span>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users.items %}
+                        <tr>
+                            <td>#{{ user.id }}</td>
+                            <td><strong>{{ user.username }}</strong></td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                    <span class="badge bg-primary">Admin</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Customer</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.id != session.user_id %}
+                                    <form action="{{ url_for('admin.toggle_admin', user_id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Change administrator status for this user?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-info" title="Toggle Admin Role">
+                                            <i class="fas fa-user-shield"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this user? This action cannot be undone.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete User">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted"><small>Current Session</small></span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if users.pages > 1 %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if users.page == page_num %}
+                                <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="{{ url_for('admin.users', page=page_num) }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-dashboard{display:flex;min-height:100vh;background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;}
+.admin-sidebar{width:280px;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-right:1px solid rgba(255,255,255,0.2);position:fixed;height:100vh;z-index:1000;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,0.1);}
+.sidebar-header{padding:1.5rem;border-bottom:1px solid rgba(102,126,234,0.1);margin-bottom:0.5rem;}
+.admin-logo{display:flex;align-items:center;gap:0.875rem;}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,#2a5298,#1e3c72);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.25rem;box-shadow:0 4px 12px rgba(102,126,234,0.4);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 4px 12px rgba(102,126,234,0.4);}50%{transform:scale(1.05);box-shadow:0 6px 20px rgba(102,126,234,0.5);}}
+.logo-text{display:flex;flex-direction:column;line-height:1.2;}
+.logo-main{font-size:1.375rem;font-weight:700;color:#1e293b;}
+.logo-sub{font-size:0.6875rem;color:#2a5298;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;}
+.sidebar-nav{padding:1rem;flex:1;}
+.nav-item{display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1rem;margin-bottom:0.5rem;color:#64748b;text-decoration:none;border-radius:12px;transition:all 0.3s ease;}
+.nav-item:hover,.nav-item.active{background:linear-gradient(135deg,rgba(102,126,234,0.1),rgba(118,75,162,0.1));color:#2a5298;transform:translateX(4px);}
+.nav-icon{width:36px;height:36px;border-radius:10px;background:rgba(102,126,234,0.1);display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.nav-item:hover .nav-icon,.nav-item.active .nav-icon{background:linear-gradient(135deg,#2a5298,#1e3c72);color:white;}
+.admin-main{flex:1;margin-left:280px;padding:1.5rem 2rem;background:linear-gradient(180deg,#f1f5f9 0%,#f8fafc 100%);min-height:100vh;}
+.admin-header-section{background:linear-gradient(135deg,#2a5298 0%,#1e3c72 100%);border-radius:20px;padding:1.5rem 2rem;margin-bottom:1.5rem;box-shadow:0 10px 40px rgba(102,126,234,0.3);position:relative;overflow:hidden;color:white;}
+.main-title{font-size:1.75rem;font-weight:700;margin:0 0 0.5rem 0;}
+.subtitle{color:rgba(255,255,255,0.8);margin:0;font-size:0.95rem;}
+.content-card{background:white;border-radius:20px;padding:1.5rem;box-shadow:0 4px 6px rgba(0,0,0,0.02);}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #f1f5f9;}
+.header-title{display:flex;align-items:center;gap:0.75rem;}
+.title-icon{width:32px;height:32px;background:rgba(102,126,234,0.1);color:#2a5298;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+.header-title h3{margin:0;font-size:1.25rem;color:#1e293b;font-weight:600;}
+.table{margin-bottom:0;}
+.table th{background:#f8fafc;color:#64748b;font-weight:600;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em;padding:1rem;border-top:none;border-bottom:2px solid #e2e8f0;white-space:nowrap;}
+.table td{padding:1rem;vertical-align:middle;color:#334155;border-bottom:1px solid #f1f5f9;}
+.table tr:last-child td{border-bottom:none;}
+.table tbody tr{transition:all 0.2s ease;}
+.table tbody tr:hover{background:#f8fafc;}
+.badge{padding:0.4rem 0.8rem;border-radius:6px;font-weight:500;}
+.bg-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;}
+.bg-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;}
+.bg-secondary { background: linear-gradient(135deg, #8baaaa 0%, #ae8b9c 100%) !important;}
+.btn-sm{padding:0.4rem 0.6rem;border-radius:8px;}
+.pagination .page-link{border-radius:8px;margin:0 0.2rem;border:none;color:#64748b;font-weight:500;}
+.pagination .page-item.active .page-link{background:linear-gradient(135deg,#2a5298,#1e3c72);color:white;}
+.sidebar-footer{padding:1.5rem;border-top:1px solid rgba(102,126,234,0.1);margin-top:auto;}
+.admin-profile{display:flex;align-items:center;gap:1rem;padding:0.5rem;}
+.profile-avatar{width:40px;height:40px;background:linear-gradient(135deg,#2a5298,#1e3c72);border-radius:12px;color:white;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.profile-info{display:flex;flex-direction:column;}
+.profile-name{font-weight:600;color:#1e293b;font-size:0.9rem;}
+.profile-role{font-size:0.75rem;color:#64748b;}
+</style>
+{% endblock %}

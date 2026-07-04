@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Contact Hero Section -->
+<section class="contact-hero-section">
+    <div class="contact-hero-overlay"></div>
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-12 text-center">
+                <div class="hero-badge">💬 Get In Touch</div>
+                <h1 class="contact-hero-title">
+                    <span class="hero-title-main">Contact Us</span>
+                    <span class="hero-title-sub">We're Here to Help</span>
+                </h1>
+                <p class="contact-hero-description">
+                    Have questions about our products, need help with an order, or want to share feedback?
+                    Our team is ready to assist you. Reach out to us through any of the channels below.
+                </p>
+                <div class="contact-hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number"> 1hr</span>
+                        <span class="stat-label">Response Time</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Support</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">5</span>
+                        <span class="stat-label">Languages</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">4.9</span>
+                        <span class="stat-label">Satisfaction</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form & Info Section -->
+<section class="contact-main-section py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Contact Form -->
+            <div class="col-lg-8 mb-5">
+                <div class="contact-form-container">
+                    <div class="form-header">
+                        <h2 class="form-title">Send us a Message</h2>
+                        <p class="form-subtitle">Fill out the form below and we'll get back to you within 24 hours</p>
+                    </div>
+
+                    <form class="contact-form" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First Name" required>
+                                    <label for="firstName">
+                                        <i class="fas fa-user me-2"></i>First Name
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last Name" required>
+                                    <label for="lastName">
+                                        <i class="fas fa-user me-2"></i>Last Name
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Email Address
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" name="phone" placeholder="Phone Number">
+                                    <label for="phone">
+                                        <i class="fas fa-phone me-2"></i>Phone Number
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="subject" name="subject" required>
+                                    <option value="">Choose a subject...</option>
+                                    <option value="order">Order Inquiry</option>
+                                    <option value="product">Product Information</option>
+                                    <option value="shipping">Shipping & Delivery</option>
+                                    <option value="returns">Returns & Exchanges</option>
+                                    <option value="complaint">Complaint</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <label for="subject">
+                                    <i class="fas fa-tag me-2"></i>Subject
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="message" name="message" placeholder="Your message..." style="height: 120px" required></textarea>
+                                <label for="message">
+                                    <i class="fas fa-comment me-2"></i>Your Message
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Subscribe to our newsletter for fashion tips and exclusive offers
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-contact-submit">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                            <span class="btn-arrow"><i class="fas fa-arrow-right"></i></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="col-lg-4">
+                <div class="contact-info-container">
+                    <!-- Quick Contact -->
+                    <div class="info-card mb-4">
+                        <div class="card-icon">
+                            <i class="fas fa-phone-volume"></i>
+                        </div>
+                        <h4>Call Us</h4>
+                        <p>Need immediate assistance? Give us a call.</p>
+                        <a href="tel:+15551234567" class="contact-link">
+                            <i class="fas fa-phone"></i> (555) 123-4567
+                        </a>
+                        <div class="contact-hours">
+                            <small>Mon-Fri: 9AM-6PM<br>Sat: 10AM-4PM</small>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="info-card mb-4">
+                        <div class="card-icon">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <h4>Email Us</h4>
+                        <p>We respond to all emails within 24 hours.</p>
+                        <a href="mailto:info@modeavenue.com" class="contact-link">
+                            <i class="fas fa-envelope"></i> info@modeavenue.com
+                        </a>
+                        <div class="response-time">
+                            <small><i class="fas fa-clock"></i> Avg. response: < 1hr</small>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Horizontal Visit Us and Live Chat Row -->
+        <div class="row mt-4">
+            <!-- Visit Us Section -->
+            <div class="col-md-6 mb-4 mb-md-0">
+                <div class="info-card h-100">
+                    <div class="card-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h4>Visit Us</h4>
+                    <p>Come see us at our flagship store.</p>
+                    <div class="contact-address">
+                        <i class="fas fa-map-marker-alt"></i>
+                        123 Fashion Street<br>
+                        Style City, SC 12345<br>
+                        United States
+                    </div>
+                    <a href="#" class="btn btn-sm btn-outline-primary mt-2">
+                        <i class="fas fa-directions"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+
+            <!-- Live Chat Section -->
+            <div class="col-md-6">
+                <div class="info-card live-chat-card h-100">
+                    <div class="card-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4>Live Chat</h4>
+                    <p>Get instant help from our support team.</p>
+                    <button class="btn btn-live-chat">
+                        <i class="fas fa-comment-dots"></i> Start Chat
+                    </button>
+                    <div class="chat-status">
+                        <span class="status-dot online"></span>
+                        <small>Online now</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Quick answers to common questions</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="faq-item">
+                    <h5><i class="fas fa-shipping-fast"></i> How long does shipping take?</h5>
+                    <p>Standard shipping takes 3-5 business days. Express shipping is available for 1-2 day delivery.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h5><i class="fas fa-undo"></i> What's your return policy?</h5>
+                    <p>We offer a 30-day return policy on all items. Items must be unused with original tags attached.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h5><i class="fas fa-credit-card"></i> What payment methods do you accept?</h5>
+                    <p>We accept all major credit cards, PayPal, Apple Pay, and Google Pay for secure checkout.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="faq-item">
+                    <h5><i class="fas fa-tshirt"></i> How do I find my size?</h5>
+                    <p>Check our size guide on each product page. If you're between sizes, we recommend sizing up.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h5><i class="fas fa-truck"></i> Do you offer international shipping?</h5>
+                    <p>Yes! We ship to over 50 countries worldwide. International shipping rates vary by location.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h5><i class="fas fa-headset"></i> How can I track my order?</h5>
+                    <p>You'll receive a tracking number via email once your order ships. You can also track it in your account.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="mb-3">Can't find what you're looking for?</p>
+            <a href="#contact" class="btn btn-outline-primary">
+                <i class="fas fa-envelope"></i> Contact Support
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="map-section py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Find Our Store</h2>
+                <p class="section-subtitle">Visit us at our flagship location</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        <div class="map-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h4>Interactive Map</h4>
+                        <p>123 Fashion Street, Style City, SC 12345</p>
+                        <a href="#" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt"></i> View Full Map
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Social Media Section -->
+<section class="social-section py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="section-title">Follow Us</h2>
+                <p class="section-subtitle">Stay connected for the latest fashion trends and updates</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="#" class="social-card facebook-card">
+                    <div class="social-icon">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <h5>Facebook</h5>
+                    <p>Follow for daily style inspiration</p>
+                    <div class="social-stats">
+                        <span>25K Followers</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="#" class="social-card instagram-card">
+                    <div class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </div>
+                    <h5>Instagram</h5>
+                    <p>See our latest collections</p>
+                    <div class="social-stats">
+                        <span>18K Followers</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="#" class="social-card twitter-card">
+                    <div class="social-icon">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <h5>Twitter</h5>
+                    <p>Fashion news and updates</p>
+                    <div class="social-stats">
+                        <span>12K Followers</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="#" class="social-card pinterest-card">
+                    <div class="social-icon">
+                        <i class="fab fa-pinterest"></i>
+                    </div>
+                    <h5>Pinterest</h5>
+                    <p>Style inspiration boards</p>
+                    <div class="social-stats">
+                        <span>8K Followers</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="final-cta-section py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-12">
+                <h2 class="final-cta-title">Still Need Help?</h2>
+                <p class="final-cta-text">Our customer service team is here to assist you with any questions or concerns.</p>
+                <div class="final-cta-buttons">
+                    <a href="tel:+15551234567" class="btn btn-primary btn-lg">
+                        <i class="fas fa-phone"></i> Call Now
+                    </a>
+                    <button class="btn btn-outline-light btn-lg" onclick="startLiveChat()">
+                        <i class="fas fa-comments"></i> Live Chat
+                    </button>
+                </div>
+                <div class="support-hours">
+                    <p><strong>Customer Support Hours:</strong> Monday - Friday: 9:00 AM - 6:00 PM EST</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
